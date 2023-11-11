@@ -52,40 +52,64 @@ def extract_features(audio_file, chunk_size=10, num_bands=6):
         print(f"Error extracting features from {audio_file}: {e}")
         return None
 
-def generate_hash(features):
-    if features is not None:
-        # Convert the list to a NumPy array
-        features_array = np.array(features)
+def generate_hash(anchor_point, target_point, time_change):
+    # Convert zero-dimensional arrays to one-dimensional arrays
+    anchor_point = np.atleast_1d(anchor_point)
+    target_point = np.atleast_1d(target_point)
 
+    # Combine anchor point, target point, and time change for hash generation
+    combined_features = np.concatenate([anchor_point, target_point, np.array([time_change])])
+
+    if combined_features is not None:
         # Convert the array to bytes
-        hash_object = hashlib.md5(features_array.tobytes())
+        hash_object = hashlib.md5(combined_features.tobytes())
         return hash_object.hexdigest()
     else:
         return None
 
+def create_hash_table(features, target_zone=50):
+    hash_table = {}
+
+    # Iterate over anchor points
+    for anchor_index, anchor_point in enumerate(features):
+        # Iterate over target points within the target zone
+        for target_index in range(anchor_index, min(anchor_index + target_zone, len(features))):
+            target_point = features[target_index]
+            time_change = target_index - anchor_index
+
+            # Generate hash using anchor point, target point, and time change
+            hash_value = generate_hash(anchor_point, target_point, time_change)
+
+            # Store the hash value in the hash table
+            if anchor_index not in hash_table:
+                hash_table[anchor_index] = []
+            hash_table[anchor_index].append((target_index, hash_value))
+
+    return hash_table
 
 def preprocess_audio_files(input_folder, output_file):
-    hash_table = {}
+    hash_tables = {}
 
     for filename in os.listdir(input_folder):
         if filename.endswith(".mp3"):
             audio_file_path = os.path.join(input_folder, filename)
 
             features = extract_features(audio_file_path)
-            audio_hash = generate_hash(features)
+            hash_table = create_hash_table(features)
+            audio_hash = generate_hash(features,features,0)
 
             if audio_hash is not None:
-                hash_table[audio_file_path] = audio_hash
+                hash_tables[filename] = hash_table
 
     try:
         with open(output_file, 'w') as json_file:
-            json.dump(hash_table, json_file)
+            json.dump(hash_tables, json_file)
     except Exception as e:
-        print(f"Error saving hash table to {output_file}: {e}")
+        print(f"Error saving hash tables to {output_file}: {e}")
+
 
 if __name__ == "__main__":
-    output_file = "hash_table.json"
+    output_file = "hash_tables_1.json"
 
     preprocess_audio_files(input_folder, output_file)
-
 

@@ -7,9 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pydub import AudioSegment
 from pydub.playback import play
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Specify the input folder containing audio files
-input_folder = "/home/nr55/Desktop/Projects/SaSProj/Songs"
+input_folder = "./Songs"
 
 # Specify the precomputed hash table file
 hash_table_file = "hash_table_cens.json"
@@ -17,7 +18,8 @@ hash_table_file = "hash_table_cens.json"
 def extract_features(audio_signal, sample_rate):
     # Extract Chroma Energy Normalized (CENS) features from the audio signal using Constant-Q Transform (CQT)
     features = librosa.feature.chroma_cens(y=audio_signal, sr=sample_rate)
-    return features
+    features_normalized = librosa.util.normalize(features)
+    return features_normalized
 
 def generate_hash(features):
     # Convert the features to a hash using hashlib
@@ -39,14 +41,31 @@ def find_most_similar_song(input_features, hash_table):
     # Generate a hash for the input features
     input_hash = generate_hash(input_features)
 
-    # Compare the input hash with the hashes in the hash table
-    similarity_scores = {key: np.sum(np.array(list(hash_table[key])) == np.array(list(input_hash)))
-                         for key in hash_table}
+    # Convert hex string to binary array
+    binary_input_hash = bin(int(input_hash, 16))[2:]
+
+    # Ensure the binary string has the same length as other hashes in the table by padding with zeros
+    binary_input_hash = binary_input_hash.zfill(128)
+
+    # Calculate cosine similarity with each hash in the hash table
+    similarity_scores={}
+    for key in hash_table:
+        try:
+            hash_in_table = hash_table[key]
+            binary_hash = bin(int(hash_in_table, 16))[2:]
+            binary_hash = binary_hash.zfill(128)
+            similarity_scores[key] = cosine_similarity([np.array([int(bit) for bit in binary_input_hash])],
+                                                    [np.array([int(bit) for bit in binary_hash])])[0][0]
+        except ValueError as e:
+            print(f"Error processing hash for key '{key}': {e}")
+            similarity_scores[key] = 0.0
+
 
     # Find the audio file with the highest similarity score
     most_similar_song = max(similarity_scores, key=similarity_scores.get)
 
     return most_similar_song, similarity_scores
+
 
 def play_audio(audio_signal, sample_rate):
     # Convert the NumPy array to PyDub AudioSegment

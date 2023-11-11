@@ -17,15 +17,15 @@ def extract_features(audio_signal, sample_rate, chunk_size=10, num_bands=6):
         if len(audio_signal.shape) > 1:
             audio_signal = audio_signal[:, 0]
 
-        # Resample the signal to 8192 Hz
-        audio_signal_resampled = librosa.resample(audio_signal, orig_sr=sample_rate, target_sr=8192)
+        # Resample the signal to 16384 Hz
+        audio_signal_resampled = librosa.resample(audio_signal, orig_sr=sample_rate, target_sr=16384)
 
         # Apply hamming window (window length 1024) and extract features for each chunk
         window_size = 1024
         hop_size = 32
         features = []
 
-        for chunk in librosa.util.frame(audio_signal_resampled, frame_length=chunk_size * 8192, hop_length=chunk_size * 8192, axis=0):
+        for chunk in librosa.util.frame(audio_signal_resampled, frame_length=chunk_size * 16384, hop_length=chunk_size * 16384, axis=0):
             chunk_windowed = np.pad(chunk, pad_width=window_size // 2, mode='reflect')
             chunk_windowed = librosa.effects.preemphasis(chunk_windowed)
             stft_result = np.abs(librosa.stft(chunk_windowed, hop_length=hop_size, window='hamming'))
@@ -36,7 +36,7 @@ def extract_features(audio_signal, sample_rate, chunk_size=10, num_bands=6):
             bands = [stft_result[i * bins_per_band:(i + 1) * bins_per_band, :] for i in range(num_bands)]
 
             # Find local maxima in each band
-            maxima_per_band = [np.where((bands[i] == np.max(bands[i], axis=0)) & (bands[i] > 0.1 * np.max(bands[i]))) for i in range(num_bands)]
+            maxima_per_band = [np.where((bands[i] == np.max(bands[i], axis=0)) & (bands[i] > 0.8 * np.max(bands[i]))) for i in range(num_bands)]
 
             # Flatten the array before further processing
             flat_maxima = np.concatenate(maxima_per_band, axis=1).flatten()
@@ -55,14 +55,17 @@ def extract_features(audio_signal, sample_rate, chunk_size=10, num_bands=6):
         print(f"Error extracting features from audio signal: {e}")
         return None
 
-    
 def generate_hash(features):
     if features is not None:
         # Convert the list to a NumPy array
         features_array = np.array(features)
 
         # Convert the array to bytes
-        hash_object = hashlib.md5(features_array.tobytes())
+        features_bytes = features_array.tobytes()
+
+        # Use SHA-256 for hashing
+        hash_object = hashlib.sha256(features_bytes)
+
         return hash_object.hexdigest()
     else:
         return None
@@ -75,7 +78,9 @@ def load_hash_table(json_file):
     # Load the precomputed hash table from the JSON file
     with open(json_file, 'r') as file:
         hash_table = json.load(file)
+
     return hash_table
+
 
 def remove_noise(audio_signal, threshold=0.02):
     # Apply thresholding to remove noise
@@ -95,19 +100,26 @@ def find_most_similar_song(input_features, hash_table):
 
     for key in hash_table:
         hash_value = hash_table[key]
-        
+
         # Skip if the hash value is None
         if hash_value is None:
             continue
 
-        # Calculate Hamming distance as a similarity score
-        similarity_score = len(input_hash) - hamming_distance(hash_value, input_hash)
+        # Ensure hashes have the same length
+        min_len = min(len(input_hash), len(hash_value))
+        hamming_dist = hamming_distance(input_hash[:min_len], hash_value[:min_len])
+
+
+        # Calculate similarity score
+        similarity_score = 1 - (hamming_dist / len(input_hash))  # Use the length of the input hash for normalization
         similarity_scores[key] = similarity_score
+
 
     # Find the audio file with the highest similarity score
     most_similar_song = max(similarity_scores, key=similarity_scores.get)
 
     return most_similar_song, similarity_scores
+
 
 def play_audio(audio_signal, sample_rate):
     # Convert the NumPy array to PyDub AudioSegment
@@ -131,7 +143,7 @@ def plot_similarity(similarity_scores):
 def main():
 
     # Specify the precomputed hash table file
-    hash_table_file = "hash_table.json"
+    hash_table_file = "hash_table_2.json"
 
     # Load the hash table
     hash_table = load_hash_table(hash_table_file)

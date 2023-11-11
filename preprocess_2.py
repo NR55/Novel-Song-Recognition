@@ -14,15 +14,15 @@ def extract_features(audio_file, chunk_size=10, num_bands=6):
         # Convert stereo to mono
         y, sr = librosa.load(audio_file, mono=True)
 
-        # Resample the signal to 8192 Hz
-        y_resampled = librosa.resample(y, orig_sr=sr, target_sr=8192)
+        # Resample the signal to 16384 Hz
+        y_resampled = librosa.resample(y, orig_sr=sr, target_sr=16384)
 
         # Apply hamming window (window length 1024) and extract features for each chunk
         window_size = 1024
         hop_size = 32
         features = []
 
-        for chunk in librosa.util.frame(y_resampled, frame_length=chunk_size * 8192, hop_length=chunk_size * 8192, axis=0):
+        for chunk in librosa.util.frame(y_resampled, frame_length=chunk_size * 16384, hop_length=chunk_size * 16384, axis=0):
             chunk_windowed = np.pad(chunk, pad_width=window_size // 2, mode='reflect')
             chunk_windowed = librosa.effects.preemphasis(chunk_windowed)
             stft_result = np.abs(librosa.stft(chunk_windowed, hop_length=hop_size, window='hamming'))
@@ -33,7 +33,7 @@ def extract_features(audio_file, chunk_size=10, num_bands=6):
             bands = [stft_result[i * bins_per_band:(i + 1) * bins_per_band, :] for i in range(num_bands)]
 
             # Find local maxima in each band
-            maxima_per_band = [np.where((bands[i] == np.max(bands[i], axis=0)) & (bands[i] > 0.1 * np.max(bands[i]))) for i in range(num_bands)]
+            maxima_per_band = [np.where((bands[i] == np.max(bands[i], axis=0)) & (bands[i] > 0.8 * np.max(bands[i]))) for i in range(num_bands)]
 
             # Flatten the array before further processing
             flat_maxima = np.concatenate(maxima_per_band, axis=1).flatten()
@@ -58,7 +58,11 @@ def generate_hash(features):
         features_array = np.array(features)
 
         # Convert the array to bytes
-        hash_object = hashlib.md5(features_array.tobytes())
+        features_bytes = features_array.tobytes()
+
+        # Use SHA-256 for hashing
+        hash_object = hashlib.sha256(features_bytes)
+
         return hash_object.hexdigest()
     else:
         return None
@@ -84,8 +88,6 @@ def preprocess_audio_files(input_folder, output_file):
         print(f"Error saving hash table to {output_file}: {e}")
 
 if __name__ == "__main__":
-    output_file = "hash_table.json"
+    output_file = "hash_table_2.json"
 
     preprocess_audio_files(input_folder, output_file)
-
-

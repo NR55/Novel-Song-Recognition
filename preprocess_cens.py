@@ -4,7 +4,7 @@ import hashlib
 import json
     
 # Specify the input folder containing audio files
-input_folder = "/home/nr55/Desktop/Projects/SaSProj/Songs"
+input_folder = "./Songs"
 
 # Specify the output file for the hash table
 output_file = "hash_table_cens.json"
@@ -12,8 +12,9 @@ output_file = "hash_table_cens.json"
 def extract_features(audio_file):
     # Use librosa to extract features (e.g., chroma features) from the audio file using CQT
     y, sr = librosa.load(audio_file)
-    features = librosa.feature.chroma_cens(y=y, sr=sr)
-    return features
+    features = librosa.feature.chroma_cens(y=y,sr=sr)
+    features_normalized = librosa.util.normalize(features)
+    return features_normalized
 
 def generate_hash(features):
     # Convert the features to a hash using hashlib
