@@ -29,19 +29,9 @@ def create_constellation(audio, Fs):
     constellation_map = []
 
     for time_idx, window in enumerate(stft.T):
-        # Spectrum is by default complex.
-        # We want real values only
         spectrum = abs(window)
-        # Find peaks - these correspond to interesting features
-        # Note the distance - want an even spread across the spectrum
         peaks, props = signal.find_peaks(spectrum, prominence=0, distance=200)
-
-        # Only want the most prominent peaks
-        # With a maximum of 15 per time slice
         n_peaks = min(num_peaks, len(peaks))
-        # Get the n_peaks largest peaks from the prominences
-        # This is an argpartition
-        # Useful explanation: https://kanoki.org/2020/01/14/find-k-smallest-and-largest-values-and-its-indices-in-a-numpy-array/
         largest_peaks = np.argpartition(props["prominences"], -n_peaks)[-n_peaks:]
         for peak in peaks[largest_peaks]:
             frequency = frequencies[peak]
@@ -80,7 +70,7 @@ def create_hashes(constellation_map, song_id=None):
 
 def plot_fft_with_stft_constellation_hashes_and_database(folder_path):
     # Create a directory to store the FFT, STFT, constellation, hash, and database images
-    output_folder = os.path.join(folder_path, "database1")
+    output_folder = os.path.join(folder_path, "Database")
     os.makedirs(output_folder, exist_ok=True)
 
     # Song Database
