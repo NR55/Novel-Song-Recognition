@@ -8,7 +8,7 @@ from tqdm import tqdm
 import pickle
 import glob
 
-folder_path = "./Songs"
+folder_path = "Songs"
 
 def create_constellation(audio, Fs):
     # Parameters
@@ -70,7 +70,7 @@ def create_hashes(constellation_map, song_id=None):
 
 def plot_fft_with_stft_constellation_hashes_and_database(folder_path):
     # Create a directory to store the FFT, STFT, constellation, hash, and database images
-    output_folder = os.path.join(folder_path, "Database")
+    output_folder = "Database"
     os.makedirs(output_folder, exist_ok=True)
 
     # Song Database
@@ -84,29 +84,8 @@ def plot_fft_with_stft_constellation_hashes_and_database(folder_path):
         # Load audio file
         y, sr = librosa.load(filename)
 
-        # Perform FFT
-        fft_result = np.fft.fft(y)
-        magnitude = np.abs(fft_result)
-        frequency = np.fft.fftfreq(len(magnitude), d=1/sr)
-
-        # Plot the FFT
-        plt.figure(figsize=(12, 4))
-        plt.plot(frequency, magnitude)
-        plt.xlim(0, 2000)
-        plt.title('FFT for {}'.format(os.path.basename(filename)))
-        plt.xlabel('Frequency (Hz)')
-        plt.ylabel('Magnitude')
-        # plt.savefig(os.path.join(output_folder, os.path.basename(filename).replace(".mp3", "_fft_plot.png")))
-        # plt.show()
-
         # Create Constellation Map
         constellation_map = create_constellation(y, sr)
-
-        # Transform [(x, y), ...] into ([x1, x2...], [y1, y2...]) for plotting using zip
-        plt.scatter(*zip(*constellation_map))
-        plt.title('Constellation Map for {}'.format(os.path.basename(filename)))
-        plt.xlabel('Time (s)')
-        plt.ylabel('Frequency (Hz)')
 
         # Create and Investigate Hashes
         hashes = create_hashes(constellation_map, index)

@@ -34,9 +34,6 @@ def create_constellation(audio, Fs):
         # Only want the most prominent peaks
         # With a maximum of 15 per time slice
         n_peaks = min(num_peaks, len(peaks))
-        # Get the n_peaks largest peaks from the prominences
-        # This is an argpartition
-        # Useful explanation: https://kanoki.org/2020/01/14/find-k-smallest-and-largest-values-and-its-indices-in-a-numpy-array/
         largest_peaks = np.argpartition(props["prominences"], -n_peaks)[-n_peaks:]
         for peak in peaks[largest_peaks]:
             frequency = frequencies[peak]
@@ -120,5 +117,5 @@ def plot_fft_with_stft_constellation_and_hashes(folder_path):
                 print(f"Hash {hash_val} occurred at {time} in {filename}")
 
 if __name__ == "__main__":
-    folder_path = "/home/nr55/Desktop/Projects/SaSProj/Songs"
+    folder_path = "../Songs"
     plot_fft_with_stft_constellation_and_hashes(folder_path)

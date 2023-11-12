@@ -30,5 +30,5 @@ def process_and_plot_mp3_folder(folder_path):
             #plt.close()
 
 if __name__ == "__main__":
-    folder_path = "/home/nr55/Desktop/Projects/SaSProj/Song_ss"
+    folder_path = "../Songs"
     process_and_plot_mp3_folder(folder_path)

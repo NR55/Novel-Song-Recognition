@@ -25,5 +25,5 @@ def plot_sound_wave(folder_path):
             plt.show()
 
 if __name__ == "__main__":
-    folder_path = "/home/nr55/Desktop/Projects/SaSProj/Song_ss"
+    folder_path = "../Songs"
     plot_sound_wave(folder_path)

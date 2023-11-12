@@ -10,8 +10,8 @@ import sounddevice as sd
 from preprocessing import create_constellation, create_hashes
 
 # Load the database
-database = pickle.load(open('./Database/database.pickle', 'rb'))
-song_name_index = pickle.load(open("./Database/song_index.pickle", "rb"))
+database = pickle.load(open('Database/database.pickle', 'rb'))
+song_name_index = pickle.load(open("Database/song_index.pickle", "rb"))
 
 # Function to remove noise from audio signal
 def remove_noise(audio_signal, threshold=0.00):

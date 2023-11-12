@@ -61,6 +61,13 @@ def get_song_name(song_path):
     # Extract the song name from the file path
     return song_path[song_path.rfind('/') + 1 : song_path.rfind('.mp3')]
 
+def play_top_matching_song(song_address, Fs):
+    top_song_audio, _ = librosa.load(song_address, sr=Fs)
+
+    print(f"Playing the top matching song: {song_address}")
+    sd.play(top_song_audio, samplerate=Fs)
+    sd.wait()
+
 def audio_matching(database, song_name_index, audio_input, threshold=0.00):
     # Create the constellation and hashes
     constellation = create_constellation(audio_input, Fs)
@@ -73,28 +80,8 @@ def audio_matching(database, song_name_index, audio_input, threshold=0.00):
     top_match = scores[0]
     top_song_index, (offset, score) = top_match
     print(f"Top Matching Song: {get_song_name(song_name_index[top_song_index])}, Score: {score} at {offset}")
-
-    # Collect scores and corresponding song names for histogram
-    histogram_data = [(get_song_name(song_name_index[score[0]]), score[1][1]) for score in scores]
-
-    # Sort the data by scores in descending order
-    histogram_data.sort(key=lambda x: x[1], reverse=True)
-
-    # Take only the top 5 songs for plotting
-    top5_data = histogram_data[:5]
-    
-    # Unzip the data for plotting
-    song_names, scores = zip(*top5_data)
-
-    # Plot histogram of top 5 matched songs and their scores
-    plt.figure(figsize=(14, 6))
-    plt.bar(song_names, scores, color='blue', alpha=0.7)
-    plt.title('Histogram of Top 5 Matched Songs and Their Scores')
-    plt.xlabel('Song Name')
-    plt.ylabel('Score')
-    plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better visibility
-    plt.show()
-
+    top_song_address = song_name_index[top_song_index]
+    play_top_matching_song(top_song_address, Fs)
 
 if __name__ == "__main__":
 
