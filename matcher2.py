@@ -63,16 +63,16 @@ class SongRecognitionApp:
         matches_per_song = {}
         for hash, (sample_time, _) in hashes.items():
             if hash in self.database:
-                matching_occurrences = self.database[hash]
-                for source_time, song_index in matching_occurrences:
+                mat_occ = self.database[hash]
+                for src_time, song_index in mat_occ:
                     if song_index not in matches_per_song:
                         matches_per_song[song_index] = []
-                    matches_per_song[song_index].append((hash, sample_time, source_time))
+                    matches_per_song[song_index].append((hash, sample_time, src_time))
         scores = {}
         for song_index, matches in matches_per_song.items():
             song_scores_by_offset = {}
-            for hash, sample_time, source_time in matches:
-                delta = source_time - sample_time
+            for hash, sample_time, src_time in matches:
+                delta = src_time - sample_time
                 if delta not in song_scores_by_offset:
                     song_scores_by_offset[delta] = 0
                 song_scores_by_offset[delta] += 1
