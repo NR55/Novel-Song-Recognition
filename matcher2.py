@@ -13,7 +13,7 @@ class SongRecognitionApp:
         self.root.title("Song Recognition App")
 
         # Load the background image
-        image_path = "./AppBackground/Music_Wallpaper.jpg"  # Replace with the actual path to your image
+        image_path = "./AppBackground/Music_Wallpaper1.jpg"  # Replace with the actual path to your image
         background_image = Image.open(image_path)
 
         # Set the size of the Tkinter window to match the image
@@ -133,15 +133,14 @@ class SongRecognitionApp:
             cover_image = Image.open(cover_image_path)
             cover_photo = ImageTk.PhotoImage(cover_image)
 
-            # Create a label to display the cover image
-            cover_label = tk.Label(self.root, image=cover_photo)
-            cover_label.image = cover_photo
-            cover_label.place(relx=0.5, rely=0.6, anchor="center")
         else:
-            print("Cover image does not exist.")
-
-
-
+            cover_image = Image.open("./CoverImages/Default.jpg")
+            cover_photo = ImageTk.PhotoImage(cover_image)
+        
+        # Create a label to display the cover image
+        cover_label = tk.Label(self.root, image=cover_photo)
+        cover_label.image = cover_photo
+        cover_label.place(relx=0.5, rely=0.6, anchor="center")
 
 
 if __name__ == "__main__":
