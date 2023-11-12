@@ -6,4 +6,4 @@ This is a Project for IT-204 Signals and Systems course, done by three 2nd Year 
 - Abhay Lejith
 - Nandan Ramesh.
 
-We'll be greatful for taking your time out and falling in love with our project.
+We're grateful for taking your time out and falling in love with our project.
