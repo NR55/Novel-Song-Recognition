@@ -17,3 +17,5 @@ def plot_sound_wave():
 
 if __name__ == "__main__":
     plot_sound_wave()
+
+    plot_sound_wave()
