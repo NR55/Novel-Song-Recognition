@@ -12,3 +12,5 @@ Steps to run :
 1. Copy all your songs into the `Songs` folder. This serves as the dataset.
 2. Run `preprocessing.py` first to generate the databases in the `Database` folder.
 3. Run `master_matcher.py` to obtain an interactive interface.
+
+Check out the `Steps` folder to view the different stages of preprocessing.
