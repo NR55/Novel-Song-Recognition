@@ -5,16 +5,14 @@ import matplotlib.pyplot as plt
 
 def plot_sound_wave():
 
-    filename="Ijazat"
-    file_path = "Songs/"+filename+".mp3"
+    example_file = librosa.example('trumpet')
 
-    # Load audio file
-    y, sr = librosa.load(file_path)
+    y, sr = librosa.load(example_file)
 
     # Plot the sound wave
     plt.figure(figsize=(12, 4))
     librosa.display.waveshow(y, sr=sr)
-    plt.title('Sound Wave for {}'.format(filename))
+    plt.title('Sound Wave for Example Song')
     plt.show()
 
 if __name__ == "__main__":

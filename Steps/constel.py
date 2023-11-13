@@ -3,29 +3,29 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 from scipy import signal
+from IPython.display import Audio, display
+import sounddevice as sd
 
 def plot_sound_wave_and_stft():
 
-    filename="Eminem - Rap God"
-    file_path = "Songs/"+filename+".mp3"
+    example_file = librosa.example('trumpet')
 
-    # Load audio file
-    y, sr = librosa.load(file_path)
+    y, sr = librosa.load(example_file)
 
     # Plot the sound wave
-    plt.figure(figsize=(12, 4))
+    plt.figure(figsize=(6, 4))
     librosa.display.waveshow(y, sr=sr)
-    plt.title('Sound Wave for {}'.format(filename))
+    plt.title('Sound Wave for Example Song')
     plt.show()
 
     # Perform STFT
     D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
 
     # Plot the STFT
-    plt.figure(figsize=(12, 4))
+    plt.figure(figsize=(6, 4))
     librosa.display.specshow(D, sr=sr, x_axis='time', y_axis='log')
     plt.colorbar(format='%+2.0f dB')
-    plt.title('STFT for {}'.format(filename))
+    plt.title('STFT for Example Song')
     plt.show()
 
     # Perform constellation map
@@ -43,10 +43,14 @@ def plot_sound_wave_and_stft():
             constellation_map.append([time_idx, frequency])
 
     plt.scatter(*zip(*constellation_map))
-    plt.title('Constellation Map for {}'.format(filename))
+    plt.title('Constellation Map for Example Song')
     plt.xlabel('Time Index')
     plt.ylabel('Frequency (Hz)')
     plt.show()
+
+    sd.play(y, sr)
+    sd.wait()
+
 
 if __name__ == "__main__":
     plot_sound_wave_and_stft()
